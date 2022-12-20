@@ -70,8 +70,8 @@ export class FirstCdkStack extends cdk.Stack {
     const s3Lambda = new NodejsFunction(this, 's3lambda', {
       entry: join(__dirname, '..', 'lambdas', 'list-bucket', 'index.ts'),
       handler: 'handler',
-      // runtime: Runtime.NODEJS_18_X,
-      runtime: Runtime.NODEJS_16_X,
+      runtime: Runtime.NODEJS_18_X,
+      // runtime: Runtime.NODEJS_16_X,
       timeout: Duration.minutes(1)
     })
     const s3LambdaIntegration = new LambdaIntegration(s3Lambda)
