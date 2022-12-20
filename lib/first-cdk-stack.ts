@@ -8,6 +8,7 @@ import {join} from 'path'
 import { Integration, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { DynamodbTable } from './dynamoDB';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 export class FirstCdkStack extends cdk.Stack {
   private apiCdk = new RestApi(this, 'apiCdk')
@@ -65,11 +66,26 @@ export class FirstCdkStack extends cdk.Stack {
     })
     const helloPyIntegration = new LambdaIntegration(helloPy)
 
+    //list s3 bucket
+    const s3Lambda = new NodejsFunction(this, 's3lambda', {
+      entry: join(__dirname, '..', 'lambdas', 'list-bucket', 'index.ts'),
+      handler: 'handler',
+      // runtime: Runtime.NODEJS_18_X,
+      runtime: Runtime.NODEJS_16_X,
+      timeout: Duration.minutes(1)
+    })
+    const s3LambdaIntegration = new LambdaIntegration(s3Lambda)
 
+    //add policy
+    const s3ListPolicy = new PolicyStatement()
+    s3ListPolicy.addActions('s3:ListAllMyBuckets')
+    s3ListPolicy.addResources('*')
+    s3Lambda.addToRolePolicy(s3ListPolicy)
     
 
     
-
+    const s3LambdaResource = this.apiCdk.root.addResource('s3-lambda')
+    s3LambdaResource.addMethod('GET', s3LambdaIntegration)
     const helloResource = this.apiCdk.root.addResource('hello')
     helloResource.addMethod('GET', helloIntegration)
     const helloTSResource = this.apiCdk.root.addResource('hello-ts')
@@ -78,11 +94,6 @@ export class FirstCdkStack extends cdk.Stack {
     const helloPyResource = this.apiCdk.root.addResource('hello-py')
     helloPyResource.addMethod('GET', helloPyIntegration)
 
-    // The code that defines your stack goes here
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'FirstCdkQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
   }
 }

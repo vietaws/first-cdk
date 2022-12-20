@@ -2,12 +2,17 @@
 // npm i aws-sdk
 
 import {S3} from 'aws-sdk'
+// import { S3Client } from '@aws-sdk/client-s3'
 
-// const s3Client = S3.s3Client()
+const s3Client2 = new S3()
+// const s3Client3 = new S3Client({ region: "ap-southeast-1" })
 
-exports.handler = async(event : any, context : any) =>{
+const handler = async (event : any, context : any) =>{
+    const listBuckets = await s3Client2.listBuckets().promise()
+    console.log("I got an event")
     return {
         statusCode: 200,
-        body: JSON.stringify('Hello from AWS ')
+        body: JSON.stringify('Here is the buckets: ' + JSON.stringify(listBuckets.Buckets))
     }
 }
+export  {handler}
